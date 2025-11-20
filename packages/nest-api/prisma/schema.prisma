@@ -1,0 +1,50 @@
+model Trivia {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String   @db.ObjectId
+  title     String
+  questions Json
+  isActive  Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+
+model TriviaSettings {
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  timeLimit     Int      @default(15)
+  maxQuestions  Int      @default(10)
+  pointsBase    Int      @default(100)
+  updatedAt     DateTime @updatedAt
+}
+
+model TriviaQuestion {
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  question      String
+  options       String[]
+  correctAnswer String
+  active        Boolean  @default(true)
+  createdAt     DateTime @default(now())
+}
+
+
+enum UserType {
+  FREE
+  PAID
+}
+
+model UserDashboard {
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  email         String   @unique
+  username      String?  
+  password      String
+  createdAt     DateTime @default(now())
+  userType      UserType @default(FREE) 
+}
