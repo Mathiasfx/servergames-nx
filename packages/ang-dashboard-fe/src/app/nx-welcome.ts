@@ -430,6 +430,10 @@ import { CommonModule } from '@angular/common';
       <div class="container">
         <!--  WELCOME  -->
         <div id="welcome">
+          <h1 class="text-4xl font-bold text-red-900">¡Tailwind funciona!</h1>
+          <button class="mt-4 bg-blue-500 text-white rounded py-2 px-4 hover:bg-blue-700">
+            Tailwind Button
+          </button>
           <h1>
             <span> Hello there, </span>
             Welcome ang-dashboard-fe 👋
@@ -715,6 +719,7 @@ import { CommonModule } from '@angular/common';
                 >
               </span>
             </a>
+
             <div id="nx-cloud" class="rounded shadow">
               <div>
                 <svg
