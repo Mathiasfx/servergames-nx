@@ -7,6 +7,8 @@ import {
   ReactiveFormsModule,
 } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { Router, RouterModule } from '@angular/router'; 
+
 
 // PrimeNG Modules
 import { CardModule } from 'primeng/card';
@@ -27,6 +29,8 @@ import { ToastModule } from 'primeng/toast';
     ButtonModule,
     PasswordModule,
     ToastModule,
+    RouterModule
+    
   ],
   providers: [MessageService],
   templateUrl: './login.html',
@@ -36,7 +40,7 @@ export class Login {
   loginForm: FormGroup;
   hidePassword = true;
 
-  constructor(private fb: FormBuilder, private messageService: MessageService) {
+  constructor(private fb: FormBuilder, private messageService: MessageService, private router: Router) {
     this.loginForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(6)]],
@@ -52,6 +56,7 @@ export class Login {
         summary: 'Éxito',
         detail: 'Inicio de sesión exitoso',
       });
+        this.router.navigate(['/dashboard']);
     } else {
       this.messageService.add({
         severity: 'error',

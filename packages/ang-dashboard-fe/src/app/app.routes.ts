@@ -1,24 +1,10 @@
-import { Route } from '@angular/router';
+import { Routes } from '@angular/router';
 import { Login } from './login/login';
+import { RegisterComponent } from './register/register';
 
-export const appRoutes: Route[] = [
-  {
-    path: '',
-    redirectTo: 'login',
-    pathMatch: 'full'
-  },
-  {
-    path: 'login',
-    component: Login
-  },
-  // Agrega aquí más rutas según sea necesario
-  // Ejemplo para el dashboard:
-  // {
-  //   path: 'dashboard',
-  //   loadComponent: () => import('./dashboard/dashboard.component').then(m => m.DashboardComponent)
-  // },
-  {
-    path: '**',
-    redirectTo: 'login'
-  }
+export const appRoutes: Routes = [
+  { path: '', redirectTo: '/login', pathMatch: 'full' },
+  { path: 'login', component: Login },
+  { path: 'registro', component: RegisterComponent },
+  { path: '**', redirectTo: '/login' },
 ];
