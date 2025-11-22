@@ -1,13 +1,17 @@
 import { Component } from '@angular/core';
 import { RouterModule } from '@angular/router';
-import { NxWelcome } from './nx-welcome';
+import { ToastModule } from 'primeng/toast';
 
 @Component({
-  imports: [NxWelcome, RouterModule],
   selector: 'app-root',
-  templateUrl: './app.html',
-  styleUrl: './app.css',
+  standalone: true,
+  imports: [RouterModule, ToastModule],
+  template: `
+    <router-outlet></router-outlet>
+    <p-toast></p-toast>
+  `,
+  styles: [],
 })
 export class App {
-  protected title = 'ang-dashboard-fe';
+  title = 'ang-dashboard-fe';
 }
