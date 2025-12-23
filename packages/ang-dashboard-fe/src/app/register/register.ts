@@ -14,6 +14,8 @@ import { CardModule } from 'primeng/card';
 import { InputTextModule } from 'primeng/inputtext';
 import { PasswordModule } from 'primeng/password';
 import { ToastModule } from 'primeng/toast';
+import { AuthService } from '../service/auth.service';
+import { HttpClientModule } from '@angular/common/http';
 
 @Component({
   selector: 'app-register',
@@ -27,6 +29,7 @@ import { ToastModule } from 'primeng/toast';
     InputTextModule,
     PasswordModule,
     ToastModule,
+    HttpClientModule,
   ],
   providers: [MessageService],
   templateUrl: './register.html',
@@ -38,7 +41,8 @@ export class RegisterComponent {
   constructor(
     private fb: FormBuilder,
     private messageService: MessageService,
-    private router: Router
+    private router: Router,
+    private authService: AuthService
   ) {
     this.registerForm = this.fb.group(
       {
@@ -59,18 +63,27 @@ export class RegisterComponent {
 
   onSubmit() {
     if (this.registerForm.valid) {
-      console.log('Formulario enviado:', this.registerForm.value);
-      // Aquí iría la lógica de registro
-      this.messageService.add({
-        severity: 'success',
-        summary: '¡Registro exitoso!',
-        detail: 'Tu cuenta ha sido creada correctamente',
+      const { name, email, password } = this.registerForm.value;
+      this.authService.register({ name, email, password }).subscribe({
+        next: (res) => {
+          this.messageService.add({
+            severity: 'success',
+            summary: '¡Registro exitoso!',
+            detail: 'Tu cuenta ha sido creada correctamente',
+          });
+          console.log("Respuesta:", res)
+          setTimeout(() => {
+            this.router.navigate(['/login']);
+          }, 2000);
+        },
+        error: (err) => {
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: err?.error?.message || 'No se pudo registrar',
+          });
+        },
       });
-
-      // Redirigir al login después de 2 segundos
-      setTimeout(() => {
-        this.router.navigate(['/login']);
-      }, 2000);
     } else {
       this.messageService.add({
         severity: 'error',

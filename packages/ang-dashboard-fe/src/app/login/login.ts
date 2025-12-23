@@ -17,6 +17,8 @@ import { ButtonModule } from 'primeng/button';
 import { PasswordModule } from 'primeng/password';
 import { MessageService } from 'primeng/api';
 import { ToastModule } from 'primeng/toast';
+import { AuthService } from '../service/auth.service';
+import { HttpClientModule } from '@angular/common/http';
 
 @Component({
   selector: 'app-login',
@@ -29,10 +31,10 @@ import { ToastModule } from 'primeng/toast';
     ButtonModule,
     PasswordModule,
     ToastModule,
-    RouterModule
-    
+    RouterModule,
+    HttpClientModule,
   ],
-  providers: [MessageService],
+  providers: [],
   templateUrl: './login.html',
   styleUrls: ['./login.css'],
 })
@@ -40,7 +42,12 @@ export class Login {
   loginForm: FormGroup;
   hidePassword = true;
 
-  constructor(private fb: FormBuilder, private messageService: MessageService, private router: Router) {
+  constructor(
+    private fb: FormBuilder,
+    private messageService: MessageService,
+    private router: Router,
+    private authService: AuthService
+  ) {
     this.loginForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(6)]],
@@ -49,20 +56,58 @@ export class Login {
 
   onSubmit() {
     if (this.loginForm.valid) {
-      console.log('Formulario enviado:', this.loginForm.value);
-      // Aquí iría la lógica de autenticación
-      this.messageService.add({
-        severity: 'success',
-        summary: 'Éxito',
-        detail: 'Inicio de sesión exitoso',
+      this.authService.login(this.loginForm.value).subscribe({
+        next: (res) => {
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Éxito',
+            detail: 'Inicio de sesión exitoso',
+            key: 'main',
+            life: 3000,
+          });
+          // Guardar token y datos de usuario en sessionStorage
+          sessionStorage.setItem('access_token', res.access_token);
+          sessionStorage.setItem(
+            'user',
+            JSON.stringify({
+              id: res.user.id,
+              email: res.user.email,
+              username: res.user.username,
+              userType: res.user.userType,
+            })
+          );
+          this.router.navigate(['/dashboard']);
+        },
+        error: (err) => {
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: err?.error?.message || 'Credenciales inválidas',
+            key: 'main',
+            life: 3000,
+          });
+        },
       });
-        this.router.navigate(['/dashboard']);
     } else {
       this.messageService.add({
         severity: 'error',
         summary: 'Error',
         detail: 'Por favor, completa el formulario correctamente',
+        key: 'main',
+        life: 3000,
       });
     }
+  }
+
+  // En tu método probarNotificacion
+  probarNotificacion() {
+    console.log('Intentando mostrar notificación...'); // Verifica en consola
+    this.messageService.add({
+      severity: 'success',
+      summary: 'Prueba',
+      detail: '¡Esta es una notificación de prueba!',
+      key: 'main',
+      life: 3000,
+    });
   }
 }

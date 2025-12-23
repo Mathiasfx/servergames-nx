@@ -3,10 +3,22 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Estilos de PrimeNG */
-@import "primeng/resources/themes/lara-light-blue/theme.css";
-@import "primeng/resources/primeng.css";
-@import "primeicons/primeicons.css";
+/* Estilos para corregir el color del texto en inputs de PrimeNG */
+.p-inputtext {
+  color: #333333 !important;
+}
+
+.p-inputtext::placeholder {
+  color: #666666 !important;
+}
+
+.p-password-input {
+  color: #333333 !important;
+}
+
+.p-password-input::placeholder {
+  color: #666666 !important;
+}
 
 /* Estilos globales */
 body {
@@ -31,4 +43,26 @@ a {
 a:hover {
   color: #991b1b;
   text-decoration: underline;
+}
+
+/* Estilos personalizados para las notificaciones */
+.p-toast {
+  opacity: 1 !important;
+  z-index: 1000;
+}
+
+.p-toast .p-toast-message {
+  margin: 0.5rem;
+  border-radius: 6px;
+  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+}
+
+.p-toast .p-toast-message-icon {
+  font-size: 1.5rem;
+}
+
+/* Asegurar que los temas de PrimeNG se apliquen correctamente */
+:root {
+  --primary-color: #3B82F6;
+  --primary-text-color: #ffffff;
 }
