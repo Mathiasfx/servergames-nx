@@ -1,0 +1,172 @@
+.crear-trivia-container {
+  padding: 1rem;
+  background-color: #f8f9fa;
+  min-height: 100vh;
+}
+
+.main-card {
+  max-width: 800px;
+  margin: 0 auto;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.main-card ::ng-deep .p-card-body {
+  background-color: white !important;
+  color: #333 !important;
+}
+
+.main-card ::ng-deep .p-card-content {
+  background-color: white !important;
+  color: #333 !important;
+}
+
+.form-grid {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.field-label {
+  font-weight: 600;
+  color: #333;
+  font-size: 0.95rem;
+}
+
+.full-width-input {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 1rem;
+  transition: border-color 0.2s;
+  color: #333;
+  background-color: white;
+}
+
+.full-width-input:focus {
+  border-color: #b91c1c;
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(185, 28, 28, 0.1);
+}
+
+.questions-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.questions-list {
+  display: grid;
+  gap: 1rem;
+}
+
+.question-item {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 1rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.question-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.question-title {
+  margin: 0;
+  color: #333;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.question-text {
+  color: #555;
+  font-weight: 500;
+  margin: 0.5rem 0;
+}
+
+.options-list {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.option-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.25rem 0;
+}
+
+.form-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+  margin-top: 1rem;
+}
+
+.dialog-form {
+  display: grid;
+  gap: 1rem;
+}
+
+.options-input-list {
+  display: grid;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.option-input {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.option-input-field {
+  flex: 1;
+  padding: 0.5rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 0.95rem;
+  color: #333;
+  background-color: white;
+}
+
+.option-input-field:focus {
+  border-color: #b91c1c;
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(185, 28, 28, 0.1);
+}
+
+.text-red-500 {
+  color: #b91c1c;
+}
+
+.text-400 {
+  color: #9ca3af;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .crear-trivia-container {
+    padding: 0.5rem;
+  }
+  
+  .questions-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+  
+  .form-actions {
+    flex-direction: column;
+  }
+}

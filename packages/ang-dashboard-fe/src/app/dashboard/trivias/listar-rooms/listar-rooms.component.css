@@ -1,0 +1,182 @@
+.listar-rooms-container {
+  padding: 1rem;
+  background-color: #f8f9fa;
+  min-height: 100vh;
+}
+
+.page-header {
+  margin-bottom: 2rem;
+}
+
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: white;
+  padding: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.header-text {
+  flex: 1;
+}
+
+.page-title {
+  margin: 0;
+  color: #333;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.page-subtitle {
+  margin: 0.25rem 0 0 0;
+  color: #666;
+  font-size: 0.95rem;
+}
+
+.header-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.rooms-grid {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.loading-state {
+  text-align: center;
+  padding: 3rem;
+  color: #666;
+}
+
+.loading-state p {
+  margin-top: 1rem;
+  font-size: 1.1rem;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 3rem;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.empty-icon {
+  font-size: 4rem;
+  color: #9ca3af;
+  margin-bottom: 1rem;
+  display: block;
+}
+
+.empty-title {
+  margin: 0 0 0.5rem 0;
+  color: #333;
+  font-size: 1.3rem;
+  font-weight: 600;
+}
+
+.empty-subtitle {
+  margin: 0 0 1.5rem 0;
+  color: #666;
+  font-size: 1rem;
+}
+
+.rooms-list {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.room-card {
+  background: white;
+  border-radius: 8px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e5e7eb;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.room-card ::ng-deep .p-card-body {
+  background-color: white !important;
+  color: #333 !important;
+}
+
+.room-card ::ng-deep .p-card-content {
+  background-color: white !important;
+  color: #333 !important;
+}
+
+.room-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.room-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.room-title {
+  margin: 0;
+  color: #333;
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.room-info {
+  display: flex;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.info-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.info-item i {
+  color: #3b82f6;
+}
+
+.room-actions {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.room-actions button {
+  flex: 1;
+  min-width: 140px;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .listar-rooms-container {
+    padding: 0.5rem;
+  }
+  
+  .header-content {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+  
+  .room-info {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  
+  .room-actions {
+    flex-direction: column;
+  }
+  
+  .room-actions button {
+    width: 100%;
+  }
+}

@@ -1,0 +1,164 @@
+<div class="gestionar-sala-container">
+  <p-toast></p-toast>
+  
+  <!-- Header -->
+  <div class="page-header">
+    <div class="header-content">
+      <div class="header-text">
+        <h2 class="page-title">Gestión de Sala</h2>
+        <p class="page-subtitle" *ngIf="trivia">{{ trivia?.title }}</p>
+      </div>
+      <div class="header-actions">
+        <button 
+          pButton 
+          label="Volver" 
+          icon="pi pi-arrow-left"
+          class="p-button-outlined"
+          (click)="routerPublic.navigate(['/dashboard'])"
+        ></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Estado de la trivia -->
+  <p-card header="Información de la Trivia" class="info-card">
+    <div class="info-grid">
+      <div class="info-section">
+        <div class="info-item">
+          <span class="info-label">Estado:</span>
+          <p-tag 
+            [value]="trivia?.isActive ? 'Activa' : 'Inactiva'" 
+            [severity]="trivia?.isActive ? 'danger' : 'info'"
+          ></p-tag>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Preguntas:</span>
+          <span class="info-value">{{ trivia?.questions?.length || 0 }}</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Room ID:</span>
+          <span class="room-id">{{ roomId }}</span>
+        </div>
+      </div>
+      <div class="actions-section">
+        <button 
+          pButton 
+          label="Generar QR" 
+          icon="pi pi-qrcode"
+          class="p-button-outlined action-btn"
+          (click)="showQRDialog = true"
+          [disabled]="!roomId"
+        ></button>
+        <button 
+          pButton 
+          label="Iniciar Partida" 
+          icon="pi pi-play"
+          class="action-btn"
+          (click)="startGame()"
+          [disabled]="trivia?.isActive || playersCount === 0"
+        ></button>
+        <button 
+          pButton 
+          label="Finalizar Partida" 
+          icon="pi pi-stop"
+          severity="danger"
+          class="action-btn"
+          (click)="endGame()"
+          [disabled]="!trivia?.isActive"
+        ></button>
+      </div>
+    </div>
+  </p-card>
+
+  <!-- Jugadores conectados -->
+  <p-card header="Jugadores Conectados" class="players-card">
+    <div class="players-section">
+      <div class="players-header">
+        <span class="section-label">Total:</span>
+        <p-tag [value]="playersCount.toString()" severity="info"></p-tag>
+      </div>
+      
+      <div class="players-list">
+        <div *ngFor="let player of (roomState?.players || []); let i = index" class="player-item">
+          <div class="player-info">
+            <span class="player-name">{{ i + 1 }}. {{ player.name }}</span>
+            <p-tag 
+              *ngIf="player.answeredAt" 
+              value="Respondió" 
+              [severity]="player.answeredCorrect ? 'warning' : 'danger'"
+              size="small"
+            ></p-tag>
+          </div>
+          <div class="player-score">
+            <span class="score-value">{{ player.score }}</span>
+            <span class="score-label">pts</span>
+          </div>
+        </div>
+      </div>
+      
+      <div *ngIf="playersCount === 0" class="empty-state">
+        <i class="pi pi-users empty-icon"></i>
+        <p class="empty-title">No hay jugadores conectados aún</p>
+        <p class="empty-subtitle">Genera el código QR para que los jugadores se unan</p>
+      </div>
+    </div>
+  </p-card>
+
+  <!-- Estado del juego -->
+  <p-card header="Estado del Juego" *ngIf="roomState?.isActive" class="game-state-card">
+    <div class="game-state-grid">
+      <div class="game-info">
+        <div class="game-item">
+          <span class="game-label">Ronda actual:</span>
+          <p-tag [value]="currentRound.toString()" severity="info"></p-tag>
+          <span class="game-detail">de {{ totalQuestions }}</span>
+        </div>
+        <div class="game-item">
+          <span class="game-label">Respondieron:</span>
+          <span class="game-detail">{{ answeredCount }}/{{ playersCount }}</span>
+        </div>
+      </div>
+      <div class="current-question" *ngIf="roomState?.currentQuestion">
+        <h5 class="question-title">Pregunta Actual</h5>
+        <p class="question-text">{{ roomState?.currentQuestion?.question }}</p>
+        <div class="question-options">
+          <div *ngFor="let option of roomState?.currentQuestion?.options" class="option-item">
+            {{ option }}
+          </div>
+        </div>
+      </div>
+    </div>
+  </p-card>
+
+  <!-- Diálogo QR -->
+  <p-dialog 
+    header="Código QR de la Sala" 
+    [(visible)]="showQRDialog" 
+    [modal]="true" 
+    [style]="{width: '400px'}"
+    [draggable]="false"
+    [resizable]="false"
+  >
+    <div class="qr-dialog">
+      <div class="qr-code">
+        <div class="room-code">{{ roomId }}</div>
+      </div>
+      <p class="qr-description">
+        Los jugadores pueden escanear este código o ingresar manualmente el Room ID para unirse a la partida.
+      </p>
+      <p class="qr-url">
+        URL de conexión: <br>
+        <code class="url-code">ws://localhost:3007/rooms</code>
+      </p>
+    </div>
+    
+    <ng-template pTemplate="footer">
+      <button 
+        pButton 
+        label="Cerrar" 
+        icon="pi pi-times"
+        (click)="showQRDialog = false"
+      ></button>
+    </ng-template>
+  </p-dialog>
+</div>

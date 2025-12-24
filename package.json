@@ -68,6 +68,8 @@
     "@nestjs/jwt": "^11.0.1",
     "@nestjs/passport": "^11.0.5",
     "@nestjs/platform-express": "^11.0.0",
+    "@nestjs/platform-socket.io": "^11.1.10",
+    "@nestjs/websockets": "^11.1.10",
     "@primeuix/themes": "^2.0.2",
     "@prisma/client": "^6.19.0",
     "axios": "^1.6.0",
@@ -78,10 +80,12 @@
     "passport": "^0.7.0",
     "passport-local": "^1.0.0",
     "primeicons": "^6.0.1",
-    "primeng": "^20.3.0",
+    "primeng": "^20.4.0",
     "prisma": "^6.19.0",
     "reflect-metadata": "^0.1.13",
     "rxjs": "~7.8.0",
+    "socket.io": "^4.8.3",
+    "socket.io-client": "^4.8.3",
     "zone.js": "~0.15.0"
   }
 }

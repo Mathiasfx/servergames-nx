@@ -1,0 +1,84 @@
+<div class="listar-rooms-container">
+  <p-toast></p-toast>
+  
+  <!-- Header -->
+  <div class="page-header">
+    <div class="header-content">
+      <div class="header-text">
+        <h2 class="page-title">Gestión de Rooms</h2>
+        <p class="page-subtitle">Administra tus salas de trivia</p>
+      </div>
+      <div class="header-actions">
+        <button 
+          pButton 
+          label="Crear Nueva Trivia" 
+          icon="pi pi-plus"
+          class="p-button-primary"
+          (click)="createNewTrivia()"
+        ></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Lista de Rooms -->
+  <div class="rooms-grid">
+    <div *ngIf="loading" class="loading-state">
+      <p-progressSpinner></p-progressSpinner>
+      <p>Cargando tus trivias...</p>
+    </div>
+
+    <div *ngIf="!loading && trivias.length === 0" class="empty-state">
+      <i class="pi pi-folder-open empty-icon"></i>
+      <h3 class="empty-title">No tienes trivias creadas</h3>
+      <p class="empty-subtitle">Crea tu primera trivia para comenzar</p>
+      <button 
+        pButton 
+        label="Crear Trivia" 
+        icon="pi pi-plus"
+        class="p-button-primary"
+        (click)="createNewTrivia()"
+      ></button>
+    </div>
+
+    <div *ngIf="!loading && trivias.length > 0" class="rooms-list">
+      <p-card *ngFor="let trivia of trivias" class="room-card">
+        <div class="room-header">
+          <h3 class="room-title">{{ trivia.title }}</h3>
+          <p-tag 
+            [value]="trivia.isActive ? 'Activa' : 'Inactiva'" 
+            [severity]="trivia.isActive ? 'danger' : 'info'"
+          ></p-tag>
+        </div>
+        
+        <div class="room-info">
+          <div class="info-item">
+            <i class="pi pi-question-circle"></i>
+            <span>{{ trivia.questions?.length || 0 }} preguntas</span>
+          </div>
+          <div class="info-item">
+            <i class="pi pi-calendar"></i>
+            <span>{{ trivia.createdAt | date:'short' }}</span>
+          </div>
+        </div>
+
+        <div class="room-actions">
+          <button 
+            pButton 
+            label="Gestionar Sala" 
+            icon="pi pi-cog"
+            class="p-button-outlined"
+            (click)="goToManageRoom(trivia.id)"
+          ></button>
+          <button 
+            pButton 
+            *ngIf="!trivia.isActive"
+            label="Iniciar Partida" 
+            icon="pi pi-play"
+            class="p-button-danger"
+            (click)="goToManageRoom(trivia.id)"
+          ></button>
+        </div>
+      </p-card>
+    </div>
+  </div>
+</div>

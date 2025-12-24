@@ -36,6 +36,20 @@
        
        
         <li>
+          <a [routerLink]="['/dashboard/crear-trivia']" routerLinkActive="bg-red-50"
+            (click)="sidebarOpen = false"
+            class="flex items-center px-3 py-2 rounded-lg text-red-700 hover:bg-red-50 font-semibold transition text-sm md:text-base">
+            <i class="pi pi-plus-circle mr-2"></i> Crear Trivia
+          </a>
+        </li>
+        <li>
+          <a [routerLink]="['/dashboard/rooms']" routerLinkActive="bg-red-50"
+            (click)="sidebarOpen = false"
+            class="flex items-center px-3 py-2 rounded-lg text-red-700 hover:bg-red-50 font-semibold transition text-sm md:text-base">
+            <i class="pi pi-users mr-2"></i> Gestión de Rooms
+          </a>
+        </li>
+        <li>
           <a [routerLink]="['/dashboard/configuracion']" routerLinkActive="bg-red-50"
             (click)="sidebarOpen = false"
             class="flex items-center px-3 py-2 rounded-lg text-red-700 hover:bg-red-50 font-semibold transition text-sm md:text-base">
