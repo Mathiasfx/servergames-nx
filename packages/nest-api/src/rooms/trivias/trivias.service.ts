@@ -20,6 +20,14 @@ export class TriviasService {
     return this.prisma.trivia.findFirst({ where: { userId } });
   }
 
+  async getTriviaById(id: string, userId?: string) {
+    if (userId) {
+      return this.prisma.trivia.findFirst({ where: { id, userId } });
+    } else {
+      return this.prisma.trivia.findFirst({ where: { id } });
+    }
+  }
+
   async updateTrivia(id: string, userId: string, dto: any) {
     return this.prisma.trivia.update({ where: { id, userId }, data: dto });
   }

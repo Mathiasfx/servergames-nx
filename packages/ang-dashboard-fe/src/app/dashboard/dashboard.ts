@@ -1,7 +1,7 @@
 /* eslint-disable @angular-eslint/prefer-inject */
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule, Router } from '@angular/router'; 
+import { RouterModule, Router, ActivatedRoute } from '@angular/router'; 
 
 @Component({
   selector: 'app-dashboard',
@@ -20,7 +20,13 @@ export class DashboardComponent implements OnInit {
     return window.innerWidth >= 768;
   }
 
-  constructor(private router: Router) {}
+  getCurrentRoute(): string {
+    const url = this.router.url;
+    // Return empty if we're exactly at /dashboard
+    return url === '/dashboard' ? '' : url;
+  }
+
+  constructor(private router: Router, private activatedRoute: ActivatedRoute) {}
 
   ngOnInit() {
     const userStr = sessionStorage.getItem('user');

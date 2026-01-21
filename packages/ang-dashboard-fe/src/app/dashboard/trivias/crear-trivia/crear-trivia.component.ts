@@ -26,6 +26,8 @@ import { TriviaService, Question, CreateTriviaDto } from '../../../service/trivi
   styleUrls: ['./crear-trivia.component.css']
 })
 export class CrearTriviaComponent implements OnInit {
+  isLoading = false;
+  
   trivia = {
     title: ''
   };
@@ -119,6 +121,7 @@ export class CrearTriviaComponent implements OnInit {
       return;
     }
 
+    this.isLoading = true;
     const triviaDto: CreateTriviaDto = {
       title: this.trivia.title,
       questions: this.questions
@@ -126,6 +129,7 @@ export class CrearTriviaComponent implements OnInit {
 
     this.triviaService.createTrivia(triviaDto).subscribe({
       next: (response) => {
+        this.isLoading = false;
         this.messageService.add({
           severity: 'danger',
           summary: 'Trivia creada',
@@ -135,6 +139,7 @@ export class CrearTriviaComponent implements OnInit {
         this.router.navigate(['/dashboard/gestionar-sala', response.id]);
       },
       error: (error) => {
+        this.isLoading = false;
         this.messageService.add({
           severity: 'error',
           summary: 'Error',

@@ -1,5 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unsafe-argument */
-import { Controller, Post, Get, Put, Delete, Body, Param, Req, UseGuards } from '@nestjs/common';
+import { Controller, Post, Get, Put, Delete, Body, Param, Req, UseGuards, Header } from '@nestjs/common';
 import { TriviasService } from './trivias.service';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 
@@ -14,8 +13,16 @@ export class TriviasController {
   }
 
   @Get('mine')
+  @Header('Cache-Control', 'no-cache, no-store, must-revalidate')
+  @Header('Pragma', 'no-cache')
+  @Header('Expires', '0')
   getMyTrivia(@Req() req) {
     return this.triviasService.getTriviaByUser(req.user.userId);
+  }
+
+  @Get(':id')
+  getTriviaById(@Param('id') id: string, @Req() req) {
+    return this.triviasService.getTriviaById(id, req.user.userId);
   }
 
   @Put(':id')

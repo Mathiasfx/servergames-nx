@@ -1,5 +1,7 @@
+<!-- eslint-disable @angular-eslint/template/elements-content -->
 <div class="listar-rooms-container">
   <p-toast></p-toast>
+  <p-confirmDialog></p-confirmDialog>
   
   <!-- Header -->
   <div class="page-header">
@@ -13,7 +15,7 @@
           pButton 
           label="Crear Nueva Trivia" 
           icon="pi pi-plus"
-          class="p-button-primary"
+          class="custom-bordo-button"
           (click)="createNewTrivia()"
         ></button>
       </div>
@@ -35,7 +37,7 @@
         pButton 
         label="Crear Trivia" 
         icon="pi pi-plus"
-        class="p-button-primary"
+        class="custom-bordo-button"
         (click)="createNewTrivia()"
       ></button>
     </div>
@@ -64,18 +66,24 @@
         <div class="room-actions">
           <button 
             pButton 
+            label="Editar" 
+            icon="pi pi-pencil"
+            class="p-button-outlined custom-bordo-button"
+            (click)="editTrivia(trivia)"
+          ></button>
+          <button 
+            pButton 
             label="Gestionar Sala" 
             icon="pi pi-cog"
-            class="p-button-outlined"
+            class="p-button-outlined custom-bordo-button"
             (click)="goToManageRoom(trivia.id)"
           ></button>
           <button 
             pButton 
-            *ngIf="!trivia.isActive"
-            label="Iniciar Partida" 
-            icon="pi pi-play"
-            class="p-button-danger"
-            (click)="goToManageRoom(trivia.id)"
+            label="Eliminar" 
+            icon="pi pi-trash"
+            class="p-button-outlined p-button-danger"
+            (click)="deleteTrivia(trivia)"
           ></button>
         </div>
       </p-card>

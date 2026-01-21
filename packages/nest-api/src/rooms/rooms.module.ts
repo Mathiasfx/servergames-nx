@@ -6,6 +6,6 @@ import { TriviasModule } from './trivias/trivias.module';
 @Module({
   imports: [TriviasModule],
   providers: [RoomsGateway, RoomsService],
-  exports: [RoomsService],
+  exports: [RoomsService, TriviasModule],
 })
 export class RoomsModule {}

@@ -1,0 +1,167 @@
+<div class="editar-trivia-container">
+  <p-toast></p-toast>
+  
+  <p-card header="Editar Trivia" class="main-card">
+    <div class="form-grid" *ngIf="!isLoading; else loading">
+      <!-- Título de la trivia -->
+      <div class="form-field">
+        <label for="title" class="field-label">Título de la Trivia</label>
+        <input 
+          pInputText 
+          id="title" 
+          type="text" 
+          [(ngModel)]="trivia!.title" 
+          placeholder="Ej: Cultura General"
+          class="full-width-input"
+          required
+        />
+      </div>
+
+      <!-- Preguntas -->
+      <div class="form-field">
+        <div class="questions-header">
+          <label class="field-label">Preguntas ({{ questions.length }}/10)</label>
+          <button 
+            pButton 
+            label="Agregar Pregunta" 
+            icon="pi pi-plus"
+            (click)="showAddQuestionDialog = true"
+            [disabled]="questions.length >= 10"
+            class="p-button-outlined"
+          ></button>
+        </div>
+
+        <div class="questions-list">
+          <div *ngFor="let question of questions; let i = index" class="question-item">
+            <div class="question-header">
+              <h5 class="question-title">Pregunta {{ i + 1 }}</h5>
+              <button 
+                pButton 
+                icon="pi pi-trash" 
+                class="p-button-rounded p-button-text p-button-danger"
+                (click)="removeQuestion(i)"
+              ></button>
+            </div>
+            <p class="question-text">{{ question.question }}</p>
+            <div class="options-list">
+              <div *ngFor="let option of question.options; let j = index" class="option-item">
+                <i class="pi" 
+                   [class.pi-check-circle]="option === question.answer"
+                   [class.pi-circle]="option !== question.answer"
+                   [class.text-green-500]="option === question.answer"
+                   [class.text-400]="option !== question.answer">
+                </i>
+                <span>{{ option }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Acciones -->
+      <div class="form-actions">
+        <button 
+          pButton 
+          label="Cancelar" 
+          icon="pi pi-times"
+          class="p-button-outlined"
+          (click)="cancel()"
+        ></button>
+        <button 
+          pButton 
+          label="Actualizar Trivia" 
+          icon="pi pi-save"
+          (click)="saveTrivia()"
+          [disabled]="!trivia?.title || questions.length === 0 || isLoading"
+        >
+          <i *ngIf="isLoading" class="pi pi-spin pi-spinner mr-2"></i>
+          {{ isLoading ? 'Actualizando...' : 'Actualizar Trivia' }}
+        </button>
+      </div>
+    </div>
+    
+    <ng-template #loading>
+      <div class="loading-container">
+        <p-progressSpinner></p-progressSpinner>
+        <p>Cargando trivia...</p>
+      </div>
+    </ng-template>
+  </p-card>
+
+  <!-- Diálogo para agregar pregunta -->
+  <p-dialog 
+    header="Agregar Pregunta" 
+    [(visible)]="showAddQuestionDialog" 
+    [modal]="true" 
+    [style]="{width: '50vw'}"
+    [draggable]="false"
+    [resizable]="false"
+  >
+    <div class="dialog-form">
+      <div class="form-field">
+        <label for="questionText" class="field-label">Pregunta</label>
+        <input 
+          pInputText 
+          id="questionText" 
+          type="text" 
+          [(ngModel)]="newQuestion.question" 
+          placeholder="Escribe tu pregunta aquí..."
+          class="full-width-input"
+        />
+      </div>
+
+      <div class="form-field">
+        <label class="field-label">Opciones de respuesta</label>
+        <div class="options-input-list">
+          <div *ngFor="let option of newQuestion.options; let i = index; trackBy: trackByIndex" class="option-input">
+            <input 
+              pInputText 
+              [(ngModel)]="newQuestion.options[i]" 
+              placeholder="Opción {{ i + 1 }}"
+              class="option-input-field"
+            />
+            <button 
+              pButton 
+              icon="pi pi-trash" 
+              class="p-button-rounded p-button-text p-button-danger"
+              (click)="removeOption(i)"
+              [disabled]="newQuestion.options.length <= 2"
+            ></button>
+            <button 
+              pButton 
+              icon="pi pi-check" 
+              class="p-button-rounded p-button-text"
+              [class.p-button-success]="newQuestion.answer === newQuestion.options[i]"
+              (click)="setCorrectAnswer(newQuestion.options[i])"
+            ></button>
+          </div>
+        </div>
+        <button 
+          pButton 
+          label="Agregar Opción" 
+          icon="pi pi-plus"
+          (click)="addOption()"
+          [disabled]="newQuestion.options.length >= 4"
+          class="p-button-outlined"
+        ></button>
+      </div>
+    </div>
+
+    <ng-template pTemplate="footer">
+      <button 
+        pButton 
+        label="Cancelar" 
+        icon="pi pi-times"
+        class="p-button-text"
+        (click)="showAddQuestionDialog = false"
+      ></button>
+      <button 
+        pButton 
+        label="Agregar Pregunta" 
+        icon="pi pi-check"
+        (click)="addQuestion()"
+        [disabled]="!newQuestion.question || newQuestion.options.length < 2 || !newQuestion.answer"
+      ></button>
+    </ng-template>
+  </p-dialog>
+</div>

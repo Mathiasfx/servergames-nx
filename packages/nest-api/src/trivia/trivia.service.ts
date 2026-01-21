@@ -39,7 +39,7 @@ export class TriviaService {
         userId,
         title: createTriviaDto.title,
         questions: createTriviaDto.questions as any,
-        isActive: false,
+        isActive: false, // No activar automáticamente al crear
       },
     });
   }

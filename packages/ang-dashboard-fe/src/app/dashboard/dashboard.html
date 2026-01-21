@@ -1,6 +1,6 @@
 <!-- eslint-disable @angular-eslint/template/interactive-supports-focus -->
 <!-- eslint-disable @angular-eslint/template/click-events-have-key-events -->
-<div class="min-h-screen flex font-sans" style="background: linear-gradient(135deg, #b91c1c 0%, #7f1d1d 100%);">
+<div class="min-h-screen flex font-sans">
   <!-- Sidebar -->
   <aside
     class="z-30 bg-white shadow-lg flex flex-col
@@ -49,13 +49,6 @@
             <i class="pi pi-users mr-2"></i> Gestión de Rooms
           </a>
         </li>
-        <li>
-          <a [routerLink]="['/dashboard/configuracion']" routerLinkActive="bg-red-50"
-            (click)="sidebarOpen = false"
-            class="flex items-center px-3 py-2 rounded-lg text-red-700 hover:bg-red-50 font-semibold transition text-sm md:text-base">
-            <i class="pi pi-cog mr-2"></i> Configuración
-          </a>
-        </li>
         
       </ul>
     </nav>
@@ -85,14 +78,13 @@
           </svg>
         </button>
         <span class="text-base md:text-lg font-semibold text-gray-800 tracking-wide">
-          Bienvenido, {{ username || 'Usuario' }}
+          {{ username || 'Usuario' }}
         </span>
         <span *ngIf="userType" class="ml-2 inline-block bg-red-100 text-red-700 px-2 md:px-3 py-1 rounded-full font-semibold text-xs md:text-sm uppercase tracking-wide">
           {{ userType }}
         </span>
       </div>
       <div class="flex items-center space-x-2 md:space-x-4">
-        <button class="bg-red-600 text-white px-3 py-2 md:px-4 md:py-2 rounded-lg font-semibold hover:bg-red-700 transition text-xs md:text-base">Nueva orden</button>
         <button
           class="bg-gray-100 text-red-700 px-3 py-2 rounded-lg font-semibold hover:bg-red-50 transition text-xs md:text-base"
           (click)="logout()"
@@ -104,6 +96,9 @@
 
     <!-- Dashboard Content -->
     <main class="p-2 md:p-8">
+    
+   
+      
       <router-outlet></router-outlet>
     </main>
   </div>

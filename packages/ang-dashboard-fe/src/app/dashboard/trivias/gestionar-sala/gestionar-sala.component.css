@@ -4,6 +4,24 @@
   min-height: 100vh;
 }
 
+/* Custom burgundy outline button */
+.custom-bordo-button {
+  background-color: transparent !important;
+  border-color: #800020 !important;
+  color: #800020 !important;
+  border-width: 2px !important;
+}
+
+.custom-bordo-button:hover {
+  background-color: #800020 !important;
+  color: white !important;
+  border-color: #800020 !important;
+}
+
+.custom-bordo-button:focus {
+  box-shadow: 0 0 0 2px rgba(128, 0, 32, 0.2) !important;
+}
+
 .page-header {
   margin-bottom: 1.5rem;
 }
@@ -89,13 +107,21 @@
   font-weight: 500;
 }
 
+.room-id.inactive {
+  color: #9ca3af;
+  font-style: italic;
+  font-size: 0.9rem;
+}
+
 .room-id {
   font-family: monospace;
   background: #f1f3f4;
-  padding: 0.25rem 0.5rem;
+  padding: 4px 8px;
   border-radius: 4px;
-  font-weight: 600;
-  color: #3b82f6;
+  font-weight: 500;
+  color: #7a0e0e;
+  font-size: 0.9rem;
+  text-align: center;
 }
 
 .actions-section {
@@ -290,6 +316,29 @@
   border-radius: 4px;
   font-family: monospace;
   font-size: 0.85rem;
+}
+
+/* Light QR Modal Styles */
+::ng-deep .light-qr-modal .p-dialog {
+  background-color: #f3f4f6 !important;
+  color: #333 !important;
+}
+
+::ng-deep .light-qr-modal .p-dialog-header {
+  background-color: #f3f4f6 !important;
+  color: #333 !important;
+  border-bottom: 1px solid #ddd;
+}
+
+::ng-deep .light-qr-modal .p-dialog-content {
+  background-color: #f3f4f6 !important;
+  color: #333 !important;
+}
+
+::ng-deep .light-qr-modal .p-dialog-footer {
+  background-color: #f3f4f6 !important;
+  color: #333 !important;
+  border-top: 1px solid #ddd;
 }
 
 /* Responsive design */

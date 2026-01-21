@@ -15,6 +15,7 @@ import { CardModule } from 'primeng/card';
 import { InputTextModule } from 'primeng/inputtext';
 import { ButtonModule } from 'primeng/button';
 import { PasswordModule } from 'primeng/password';
+import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { MessageService } from 'primeng/api';
 import { ToastModule } from 'primeng/toast';
 import { AuthService } from '../service/auth.service';
@@ -30,6 +31,7 @@ import { HttpClientModule } from '@angular/common/http';
     InputTextModule,
     ButtonModule,
     PasswordModule,
+    ProgressSpinnerModule,
     ToastModule,
     RouterModule,
     HttpClientModule,
@@ -41,6 +43,7 @@ import { HttpClientModule } from '@angular/common/http';
 export class Login {
   loginForm: FormGroup;
   hidePassword = true;
+  isLoading = false;
 
   constructor(
     private fb: FormBuilder,
@@ -56,15 +59,9 @@ export class Login {
 
   onSubmit() {
     if (this.loginForm.valid) {
+      this.isLoading = true;
       this.authService.login(this.loginForm.value).subscribe({
         next: (res) => {
-          this.messageService.add({
-            severity: 'success',
-            summary: 'Éxito',
-            detail: 'Inicio de sesión exitoso',
-            key: 'main',
-            life: 3000,
-          });
           // Guardar token y datos de usuario en sessionStorage
           sessionStorage.setItem('access_token', res.access_token);
           sessionStorage.setItem(
@@ -76,9 +73,11 @@ export class Login {
               userType: res.user.userType,
             })
           );
+          this.isLoading = false;
           this.router.navigate(['/dashboard']);
         },
         error: (err) => {
+          this.isLoading = false;
           this.messageService.add({
             severity: 'error',
             summary: 'Error',

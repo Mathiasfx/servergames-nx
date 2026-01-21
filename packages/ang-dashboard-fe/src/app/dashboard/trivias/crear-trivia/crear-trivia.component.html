@@ -1,3 +1,5 @@
+<!-- eslint-disable @angular-eslint/template/elements-content -->
+<!-- eslint-disable @angular-eslint/template/label-has-associated-control -->
 <div class="crear-trivia-container">
   <p-toast></p-toast>
   
@@ -27,7 +29,7 @@
             icon="pi pi-plus"
             (click)="showAddQuestionDialog = true"
             [disabled]="questions.length >= 10"
-            class="p-button-outlined"
+            class="p-button-outlined custom-bordo-button"
           ></button>
         </div>
 
@@ -64,16 +66,20 @@
           pButton 
           label="Cancelar" 
           icon="pi pi-times"
-          class="p-button-outlined"
+          class="p-button-outlined custom-bordo-button"
           (click)="routerPublic.navigate(['/dashboard'])"
         ></button>
         <button 
           pButton 
           label="Guardar Trivia" 
           icon="pi pi-save"
+          class="p-button-outlined custom-bordo-button"
           (click)="saveTrivia()"
-          [disabled]="!trivia.title || questions.length === 0"
-        ></button>
+          [disabled]="!trivia.title || questions.length === 0 || isLoading"
+        >
+          <i *ngIf="isLoading" class="pi pi-spin pi-spinner mr-2"></i>
+          {{ isLoading ? 'Guardando...' : 'Guardar Trivia' }}
+        </button>
       </div>
     </div>
   </p-card>
@@ -132,7 +138,7 @@
           icon="pi pi-plus"
           (click)="addOption()"
           [disabled]="newQuestion.options.length >= 4"
-          class="p-button-outlined"
+          class="p-button-outlined custom-bordo-button"
         ></button>
       </div>
     </div>
@@ -142,13 +148,14 @@
         pButton 
         label="Cancelar" 
         icon="pi pi-times"
-        class="p-button-text"
+        class="p-button-outlined custom-bordo-button"
         (click)="showAddQuestionDialog = false"
       ></button>
       <button 
         pButton 
         label="Agregar Pregunta" 
         icon="pi pi-check"
+        class="p-button-outlined custom-bordo-button"
         (click)="addQuestion()"
         [disabled]="!newQuestion.question || newQuestion.options.length < 2 || !newQuestion.answer"
       ></button>

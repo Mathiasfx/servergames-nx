@@ -327,3 +327,31 @@ display: block;
     font-size: 0.95rem;
   }
 }
+
+/* Estilos para el loading con animación de pulse */
+.loading-text-pulse {
+  font-size: 0.9rem;
+  opacity: 0.9;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 0.6;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.05);
+  }
+}
+
+/* Animación más suave para el botón en loading */
+button[type="submit"]:disabled {
+  background-color: #b91c1c;
+  color: white;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+  opacity: 0.8;
+}

@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trivia WebSocket Test Client</title>
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .input-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input, button, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        .status {
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+        }
+        .status.connected {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .status.disconnected {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .messages {
+            height: 300px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            padding: 10px;
+            background-color: #f9f9f9;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        .message {
+            margin-bottom: 5px;
+            padding: 5px;
+            border-radius: 3px;
+        }
+        .message.sent {
+            background-color: #e3f2fd;
+            border-left: 3px solid #2196f3;
+        }
+        .message.received {
+            background-color: #f3e5f5;
+            border-left: 3px solid #9c27b0;
+        }
+        .question-options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .option-button {
+            background-color: #28a745;
+        }
+        .option-button:hover {
+            background-color: #218838;
+        }
+    </style>
+</head>
+<body>
+    <h1>🎮 Trivia WebSocket Test Client</h1>
+    
+    <div class="container">
+        <h2>Conexión</h2>
+        <div class="input-group">
+            <label for="serverUrl">URL del Servidor:</label>
+            <input type="text" id="serverUrl" value="ws://localhost:3007/rooms" placeholder="ws://localhost:3007/rooms">
+        </div>
+        <button id="connectBtn" onclick="toggleConnection()">Conectar</button>
+        <div id="status" class="status disconnected">Desconectado</div>
+    </div>
+
+    <div class="container">
+        <h2>Unirse a Sala</h2>
+        <div class="input-group">
+            <label for="playerName">Nombre del Jugador:</label>
+            <input type="text" id="playerName" value="Jugador Test" placeholder="Tu nombre">
+        </div>
+        <div class="input-group">
+            <label for="roomId">Room ID:</label>
+            <input type="text" id="roomId" value="694ecd7bdd968976057aa93b" placeholder="ID de la sala">
+        </div>
+        <button id="joinBtn" onclick="joinRoom()" disabled>Unirse a Sala</button>
+    </div>
+
+    <div class="container">
+        <h2>Juego</h2>
+        <div id="gameInfo" style="display: none;">
+            <p><strong>Jugadores:</strong> <span id="playersCount">0</span></p>
+            <p><strong>Ronda:</strong> <span id="currentRound">-</span></p>
+            <div id="questionContainer" style="display: none;">
+                <h3 id="questionText"></h3>
+                <div id="questionOptions" class="question-options"></div>
+            </div>
+        </div>
+        <button id="startGameBtn" onclick="startGame()" disabled>Iniciar Juego</button>
+    </div>
+
+    <div class="container">
+        <h2>Eventos Personalizados</h2>
+        <div class="input-group">
+            <label for="customEvent">Evento:</label>
+            <select id="customEvent">
+                <option value="joinRoom">joinRoom</option>
+                <option value="startGame">startGame</option>
+                <option value="submitAnswer">submitAnswer</option>
+            </select>
+        </div>
+        <div class="input-group">
+            <label for="customData">Datos (JSON):</label>
+            <textarea id="customData" rows="3" placeholder='{"roomId": "...", "name": "..."}'></textarea>
+        </div>
+        <button onclick="sendCustomEvent()" disabled>Enviar Evento</button>
+    </div>
+
+    <div class="container">
+        <h2>📡 Mensajes</h2>
+        <div id="messages" class="messages"></div>
+        <button onclick="clearMessages()">Limpiar Mensajes</button>
+    </div>
+
+    <script>
+        let socket = null;
+        let isConnected = false;
+        let currentRoomId = null;
+        let currentPlayerId = null;
+
+        function addMessage(message, type = 'received') {
+            const messagesDiv = document.getElementById('messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${type}`;
+            messageDiv.innerHTML = `<strong>${new Date().toLocaleTimeString()}</strong>: ${message}`;
+            messagesDiv.appendChild(messageDiv);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+
+        function updateStatus(connected) {
+            const statusDiv = document.getElementById('status');
+            const connectBtn = document.getElementById('connectBtn');
+            
+            isConnected = connected;
+            
+            if (connected) {
+                statusDiv.className = 'status connected';
+                statusDiv.textContent = 'Conectado';
+                connectBtn.textContent = 'Desconectar';
+                document.getElementById('joinBtn').disabled = false;
+                document.getElementById('customEvent').disabled = false;
+            } else {
+                statusDiv.className = 'status disconnected';
+                statusDiv.textContent = 'Desconectado';
+                connectBtn.textContent = 'Conectar';
+                document.getElementById('joinBtn').disabled = true;
+                document.getElementById('startGameBtn').disabled = true;
+                document.getElementById('customEvent').disabled = true;
+            }
+        }
+
+        function toggleConnection() {
+            if (isConnected) {
+                disconnect();
+            } else {
+                connect();
+            }
+        }
+
+        function connect() {
+            const serverUrl = document.getElementById('serverUrl').value;
+            addMessage(`Conectando a ${serverUrl}...`, 'sent');
+            
+            socket = io(serverUrl);
+            
+            socket.on('connect', () => {
+                addMessage('✅ Conectado al servidor', 'received');
+                updateStatus(true);
+            });
+            
+            socket.on('disconnect', () => {
+                addMessage('❌ Desconectado del servidor', 'received');
+                updateStatus(false);
+            });
+            
+            socket.on('roomState', (data) => {
+                addMessage(`📊 Estado de la sala: ${JSON.stringify(data, null, 2)}`, 'received');
+                updateGameInfo(data);
+            });
+            
+            socket.on('playerJoined', (data) => {
+                addMessage(`👤 Jugador se unió: ${JSON.stringify(data)}`, 'received');
+            });
+            
+            socket.on('countdown', () => {
+                addMessage('🚀 ¡Cuenta regresiva iniciada!', 'received');
+            });
+            
+            socket.on('gameStarted', () => {
+                addMessage('🎮 ¡Juego iniciado!', 'received');
+                document.getElementById('gameInfo').style.display = 'block';
+            });
+            
+            socket.on('newRound', (data) => {
+                addMessage(`📝 Nueva ronda: ${JSON.stringify(data)}`, 'received');
+                showQuestion(data);
+            });
+            
+            socket.on('answerSubmitted', (data) => {
+                addMessage(`✅ Respuesta enviada: ${JSON.stringify(data)}`, 'received');
+            });
+            
+            socket.on('rankingUpdated', (data) => {
+                addMessage(`🏆 Ranking actualizado: ${JSON.stringify(data)}`, 'received');
+            });
+            
+            socket.on('gameEnded', (data) => {
+                addMessage(`🏁 Juego terminado: ${JSON.stringify(data)}`, 'received');
+            });
+            
+            socket.on('connect_error', (error) => {
+                addMessage(`❌ Error de conexión: ${error.message}`, 'received');
+                updateStatus(false);
+            });
+        }
+
+        function disconnect() {
+            if (socket) {
+                socket.disconnect();
+                socket = null;
+            }
+            updateStatus(false);
+        }
+
+        function joinRoom() {
+            const playerName = document.getElementById('playerName').value;
+            const roomId = document.getElementById('roomId').value;
+            
+            if (!playerName || !roomId) {
+                alert('Por favor ingresa nombre y Room ID');
+                return;
+            }
+            
+            const data = { roomId, name: playerName };
+            addMessage(`📤 Enviando joinRoom: ${JSON.stringify(data)}`, 'sent');
+            
+            socket.emit('joinRoom', data, (response) => {
+                addMessage(`📥 Respuesta joinRoom: ${JSON.stringify(response)}`, 'received');
+                if (response && response.success) {
+                    currentRoomId = roomId;
+                    currentPlayerId = response.playerId;
+                    document.getElementById('startGameBtn').disabled = false;
+                }
+            });
+        }
+
+        function startGame() {
+            if (!currentRoomId) return;
+            
+            // Necesitamos las preguntas del servidor o usar datos de prueba
+            const questions = [
+                {
+                    question: "no estaba",
+                    options: ["si", "no"],
+                    answer: "no"
+                }
+            ];
+            
+            const data = { roomId: currentRoomId, questions };
+            addMessage(`📤 Enviando startGame: ${JSON.stringify(data)}`, 'sent');
+            
+            socket.emit('startGame', data, (response) => {
+                addMessage(`📥 Respuesta startGame: ${JSON.stringify(response)}`, 'received');
+            });
+        }
+
+        function submitAnswer(answer) {
+            if (!currentRoomId || !currentPlayerId) return;
+            
+            const data = { roomId: currentRoomId, playerId: currentPlayerId, answer };
+            addMessage(`📤 Enviando submitAnswer: ${JSON.stringify(data)}`, 'sent');
+            
+            socket.emit('submitAnswer', data, (response) => {
+                addMessage(`📥 Respuesta submitAnswer: ${JSON.stringify(response)}`, 'received');
+            });
+        }
+
+        function sendCustomEvent() {
+            const eventName = document.getElementById('customEvent').value;
+            const dataText = document.getElementById('customData').value;
+            
+            try {
+                const data = JSON.parse(dataText);
+                addMessage(`📤 Enviando ${eventName}: ${JSON.stringify(data)}`, 'sent');
+                
+                socket.emit(eventName, data, (response) => {
+                    addMessage(`📥 Respuesta ${eventName}: ${JSON.stringify(response)}`, 'received');
+                });
+            } catch (error) {
+                alert('Error en el JSON: ' + error.message);
+            }
+        }
+
+        function updateGameInfo(roomState) {
+            if (roomState) {
+                document.getElementById('playersCount').textContent = roomState.players ? roomState.players.length : 0;
+                document.getElementById('currentRound').textContent = roomState.round || '-';
+            }
+        }
+
+        function showQuestion(data) {
+            const container = document.getElementById('questionContainer');
+            const questionText = document.getElementById('questionText');
+            const optionsContainer = document.getElementById('questionOptions');
+            
+            questionText.textContent = data.question;
+            optionsContainer.innerHTML = '';
+            
+            data.options.forEach(option => {
+                const button = document.createElement('button');
+                button.className = 'option-button';
+                button.textContent = option;
+                button.onclick = () => submitAnswer(option);
+                optionsContainer.appendChild(button);
+            });
+            
+            container.style.display = 'block';
+        }
+
+        function clearMessages() {
+            document.getElementById('messages').innerHTML = '';
+        }
+
+        // Inicializar datos de ejemplo
+        document.getElementById('customData').value = JSON.stringify({
+            roomId: "694ecd7bdd968976057aa93b",
+            name: "Jugador Test"
+        }, null, 2);
+    </script>
+</body>
+</html>

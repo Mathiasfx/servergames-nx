@@ -53,9 +53,14 @@
         <button 
           type="submit" 
           class="login-button"
-          [disabled]="!loginForm.valid"
+          [disabled]="!loginForm.valid || isLoading"
         >
-          Iniciar Sesión
+          <ng-container *ngIf="!isLoading; else loadingTemplate">
+            Iniciar Sesión
+          </ng-container>
+          <ng-template #loadingTemplate>
+            <span class="loading-text-pulse">Iniciando...</span>
+          </ng-template>
         </button>
       </form>
 

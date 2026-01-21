@@ -1,3 +1,4 @@
+<!-- eslint-disable @angular-eslint/template/elements-content -->
 <div class="gestionar-sala-container">
   <p-toast></p-toast>
   
@@ -13,7 +14,7 @@
           pButton 
           label="Volver" 
           icon="pi pi-arrow-left"
-          class="p-button-outlined"
+          class="custom-bordo-button"
           (click)="routerPublic.navigate(['/dashboard'])"
         ></button>
       </div>
@@ -27,8 +28,8 @@
         <div class="info-item">
           <span class="info-label">Estado:</span>
           <p-tag 
-            [value]="trivia?.isActive ? 'Activa' : 'Inactiva'" 
-            [severity]="trivia?.isActive ? 'danger' : 'info'"
+            [value]="roomState?.isActive ? 'Activa' : 'Inactiva'" 
+            [severity]="roomState?.isActive ? 'success' : 'warn'"
           ></p-tag>
         </div>
         <div class="info-item">
@@ -37,35 +38,39 @@
         </div>
         <div class="info-item">
           <span class="info-label">Room ID:</span>
-          <span class="room-id">{{ roomId }}</span>
+          <span class="room-id" *ngIf="roomState?.isActive">{{ roomId }}</span>
+          <span class="room-id inactive" *ngIf="!roomState?.isActive">--- (Sala inactiva)</span>
         </div>
       </div>
       <div class="actions-section">
         <button 
           pButton 
-          label="Generar QR" 
-          icon="pi pi-qrcode"
+          [label]="roomState?.isActive ? 'Desactivar Sala' : 'Activar Sala'" 
+          [icon]="roomState?.isActive ? 'pi pi-times' : 'pi pi-check'"
           class="p-button-outlined action-btn"
-          (click)="showQRDialog = true"
-          [disabled]="!roomId"
+          (click)="toggleRoomActivation()"
+          [disabled]="!roomId || isActivating"
+        >
+          <i *ngIf="isActivating" class="pi pi-spin pi-spinner mr-2"></i>
+          {{ isActivating ? (roomState?.isActive ? 'Desactivando...' : 'Activando...') : (roomState?.isActive ? 'Desactivar Sala' : 'Activar Sala') }}
+        </button>
+        <button 
+          pButton 
+          label="Código Sala" 
+          icon="pi pi-qrcode"
+          class="p-button-outlined custom-bordo-button"
+          (click)="showQRCode()"
+          [disabled]="!roomState?.isActive || !roomId"
         ></button>
         <button 
           pButton 
           label="Iniciar Partida" 
           icon="pi pi-play"
-          class="action-btn"
+          class="p-button-outlined custom-bordo-button"
           (click)="startGame()"
-          [disabled]="trivia?.isActive || playersCount === 0"
+          [disabled]="!roomState?.isActive || playersCount === 0 || roomState?.isActive"
         ></button>
-        <button 
-          pButton 
-          label="Finalizar Partida" 
-          icon="pi pi-stop"
-          severity="danger"
-          class="action-btn"
-          (click)="endGame()"
-          [disabled]="!trivia?.isActive"
-        ></button>
+       
       </div>
     </div>
   </p-card>
@@ -79,13 +84,13 @@
       </div>
       
       <div class="players-list">
-        <div *ngFor="let player of (roomState?.players || []); let i = index" class="player-item">
+        <div *ngFor="let player of getPlayers(); let i = index; trackBy: trackByPlayerId" class="player-item">
           <div class="player-info">
             <span class="player-name">{{ i + 1 }}. {{ player.name }}</span>
             <p-tag 
               *ngIf="player.answeredAt" 
               value="Respondió" 
-              [severity]="player.answeredCorrect ? 'warning' : 'danger'"
+              [severity]="player.answeredCorrect ? 'warn' : 'danger'"
               size="small"
             ></p-tag>
           </div>
@@ -99,7 +104,7 @@
       <div *ngIf="playersCount === 0" class="empty-state">
         <i class="pi pi-users empty-icon"></i>
         <p class="empty-title">No hay jugadores conectados aún</p>
-        <p class="empty-subtitle">Genera el código QR para que los jugadores se unan</p>
+        <p class="empty-subtitle">Genera el código para que los jugadores se unan</p>
       </div>
     </div>
   </p-card>
@@ -136,6 +141,7 @@
     [(visible)]="showQRDialog" 
     [modal]="true" 
     [style]="{width: '400px'}"
+    styleClass="light-qr-modal"
     [draggable]="false"
     [resizable]="false"
   >
@@ -144,12 +150,9 @@
         <div class="room-code">{{ roomId }}</div>
       </div>
       <p class="qr-description">
-        Los jugadores pueden escanear este código o ingresar manualmente el Room ID para unirse a la partida.
+        Los jugadores pueden usar este código del el Room ID para unirse a la partida.
       </p>
-      <p class="qr-url">
-        URL de conexión: <br>
-        <code class="url-code">ws://localhost:3007/rooms</code>
-      </p>
+      
     </div>
     
     <ng-template pTemplate="footer">
@@ -157,6 +160,7 @@
         pButton 
         label="Cerrar" 
         icon="pi pi-times"
+        class="p-button-outlined custom-bordo-button"
         (click)="showQRDialog = false"
       ></button>
     </ng-template>

@@ -36,6 +36,8 @@ import { HttpClientModule } from '@angular/common/http';
   styleUrls: ['./register.css'],
 })
 export class RegisterComponent {
+  isLoading = false;
+  
   registerForm: FormGroup;
 
   constructor(
@@ -63,9 +65,11 @@ export class RegisterComponent {
 
   onSubmit() {
     if (this.registerForm.valid) {
+      this.isLoading = true;
       const { name, email, password } = this.registerForm.value;
       this.authService.register({ name, email, password }).subscribe({
         next: (res) => {
+          this.isLoading = false;
           this.messageService.add({
             severity: 'success',
             summary: '¡Registro exitoso!',
@@ -77,6 +81,7 @@ export class RegisterComponent {
           }, 2000);
         },
         error: (err) => {
+          this.isLoading = false;
           this.messageService.add({
             severity: 'error',
             summary: 'Error',

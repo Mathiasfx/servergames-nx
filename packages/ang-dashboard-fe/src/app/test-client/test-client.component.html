@@ -1,0 +1,78 @@
+<div class="test-client-container">
+  <h1>🎮 Trivia WebSocket Test Client</h1>
+  
+  <div class="container">
+    <h2>Conexión</h2>
+    <div class="input-group">
+      <label for="serverUrl">URL del Servidor:</label>
+      <input type="text" id="serverUrl" [(ngModel)]="serverUrl" placeholder="http://localhost:3007/rooms">
+    </div>
+    <button id="connectBtn" (click)="toggleConnection()" [disabled]="isConnecting">
+      {{ isConnected ? 'Desconectar' : 'Conectar' }}
+    </button>
+    <div id="status" [class]="isConnected ? 'status connected' : 'status disconnected'">
+      {{ isConnected ? 'Conectado' : 'Desconectado' }}
+    </div>
+  </div>
+
+  <div class="container">
+    <h2>Unirse a Sala</h2>
+    <div class="input-group">
+      <label for="playerName">Nombre del Jugador:</label>
+      <input type="text" id="playerName" [(ngModel)]="playerName" placeholder="Tu nombre">
+    </div>
+    <div class="input-group">
+      <label for="roomId">Room ID:</label>
+      <input type="text" id="roomId" [(ngModel)]="roomId" placeholder="Ingresa el Room ID de la sala">
+    </div>
+    <button id="joinBtn" (click)="joinRoom()" [disabled]="!isConnected">Unirse a Sala</button>
+  </div>
+
+  <div class="container">
+    <h2>Juego</h2>
+    <div id="gameInfo" *ngIf="gameInfo">
+      <p><strong>Jugadores:</strong> <span id="playersCount">{{ playersCount }}</span></p>
+      <p><strong>Ronda:</strong> <span id="currentRound">{{ currentRound }}</span></p>
+      <div id="questionContainer" *ngIf="currentQuestion">
+        <h3 id="questionText">{{ currentQuestion.question }}</h3>
+        <div id="questionOptions" class="question-options">
+          <button 
+            *ngFor="let option of currentQuestion.options" 
+            class="option-button"
+            (click)="submitAnswer(option)"
+            [disabled]="!currentRoomId || !currentPlayerId">
+            {{ option }}
+          </button>
+        </div>
+      </div>
+    </div>
+    <button id="startGameBtn" (click)="startGame()" [disabled]="!currentRoomId">Iniciar Juego</button>
+  </div>
+
+  <div class="container">
+    <h2>Eventos Personalizados</h2>
+    <div class="input-group">
+      <label for="customEvent">Evento:</label>
+      <select id="customEvent" [(ngModel)]="customEvent">
+        <option value="joinRoom">joinRoom</option>
+        <option value="startGame">startGame</option>
+        <option value="submitAnswer">submitAnswer</option>
+      </select>
+    </div>
+    <div class="input-group">
+      <label for="customData">Datos (JSON):</label>
+      <textarea id="customData" [(ngModel)]="customData" rows="3" placeholder='{"roomId": "...", "name": "..."}'></textarea>
+    </div>
+    <button id="sendEventBtn" (click)="sendCustomEvent()" [disabled]="!isConnected">Enviar Evento</button>
+  </div>
+
+  <div class="container">
+    <h2>📡 Mensajes</h2>
+    <div id="messages" class="messages">
+      <div *ngFor="let message of messages" [class]="message.type" class="message">
+        <strong>{{ message.timestamp }}</strong>: {{ message.text }}
+      </div>
+    </div>
+    <button (click)="clearMessages()">Limpiar Mensajes</button>
+  </div>
+</div>

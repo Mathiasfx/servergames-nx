@@ -6,47 +6,64 @@ export interface RoomPlayer {
   score: number;
   answeredAt?: number;
   answeredCorrect?: boolean;
+  isAdmin?: boolean;
 }
 
 interface TriviaQuestion {
   question: string;
   options: string[];
-  answer: string; // opción correcta
+  correctAnswer?: string;
 }
 
 interface Room {
   id: string;
   players: RoomPlayer[];
-  currentQuestion?: TriviaQuestion;
+  currentQuestion?: {
+    question: string;
+    options: string[];
+    correctAnswer?: string;
+  };
   round: number;
   isActive: boolean;
   questions: TriviaQuestion[];
+  triviaId?: string;
 }
 
 @Injectable()
 export class RoomsService {
   private rooms: Record<string, Room> = {};
 
-  createRoom(roomId: string): Room {
-    const room: Room = {
-      id: roomId,
-      players: [],
-      round: 0,
-      isActive: false,
-      questions: [],
-    };
-    this.rooms[roomId] = room;
-    return room;
+  createRoom(roomId: string, triviaId?: string): Room {
+    if (!this.rooms[roomId]) {
+      this.rooms[roomId] = {
+        id: roomId,
+        players: [],
+        round: 0,
+        isActive: false,
+        currentQuestion: undefined,
+        questions: [],
+        triviaId: triviaId
+      };
+    }
+    return this.rooms[roomId];
   }
 
-  joinRoom(roomId: string, playerName: string): RoomPlayer {
+  joinRoom(roomId: string, playerName: string, isAdmin = false): RoomPlayer | null {
+    // Check if room exists
     if (!this.rooms[roomId]) {
-      this.createRoom(roomId);
+      return null; // Room doesn't exist
     }
+    
+    // Check if game is already started
+    if (this.rooms[roomId].isActive) {
+      return null; // Game already started
+    }
+    
     const player: RoomPlayer = {
       id: Math.random().toString(36).substring(2, 10),
       name: playerName,
-      score: 0,
+      score: isAdmin ? 0 : 0, // Admin siempre tiene 0 puntos
+      isAdmin
     };
     this.rooms[roomId].players.push(player);
     return player;
@@ -84,13 +101,13 @@ export class RoomsService {
     const room = this.rooms[roomId];
     if (!room || !room.isActive) return null;
     const player = room.players.find(p => p.id === playerId);
-    if (!player || player.answeredAt) return null; // Ya respondió
+    if (!player || player.answeredAt || player.isAdmin) return null; // Admin no responde
     player.answeredAt = Date.now();
-    const correct = answer.trim().toLowerCase() === (room.currentQuestion?.answer.trim().toLowerCase() ?? '');
+    const correct = answer.trim().toLowerCase() === (room.currentQuestion?.correctAnswer?.trim().toLowerCase() ?? '');
     player.answeredCorrect = correct;
     if (correct) {
       // Score: base + bonus por rapidez
-      const correctCount = room.players.filter(p => p.answeredCorrect).length;
+      const correctCount = room.players.filter(p => p.answeredCorrect && !p.isAdmin).length;
       const bonus = Math.max(0, 5 - correctCount); // El primero suma más
       player.score += 10 + bonus;
     }
@@ -113,6 +130,35 @@ export class RoomsService {
   getRanking(roomId: string): RoomPlayer[] {
     const room = this.rooms[roomId];
     if (!room) return [];
-    return [...room.players].sort((a, b) => b.score - a.score);
+    return [...room.players]
+      .filter(p => !p.isAdmin) // Excluir al administrador del ranking
+      .sort((a, b) => b.score - a.score);
+  }
+
+  endGame(roomId: string): boolean {
+    const room = this.rooms[roomId];
+    if (!room) return false;
+    
+    room.isActive = false;
+    room.currentQuestion = undefined;
+    
+    // Reset player answers
+    room.players.forEach(p => {
+      p.answeredAt = undefined;
+      p.answeredCorrect = false;
+    });
+    
+    return true;
+  }
+
+  updateTriviaStatus(roomId: string, isActive: boolean): boolean {
+    // Aquí iría la lógica para actualizar la base de datos
+    // Por ahora solo actualizamos el estado en memoria
+    const room = this.rooms[roomId];
+    if (room) {
+      room.isActive = isActive;
+      return true;
+    }
+    return false;
   }
 }

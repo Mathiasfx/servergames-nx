@@ -1,0 +1,176 @@
+name: Deploy Applications
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+env:
+  NODE_VERSION: '18'
+  NX_CLOUD_ACCESS_TOKEN: ${{ secrets.NX_CLOUD_ACCESS_TOKEN }}
+
+jobs:
+  # Job para detectar cambios y construir proyectos afectados
+  affected:
+    runs-on: ubuntu-latest
+    outputs:
+      api: ${{ steps.affected.outputs.api }}
+      dashboard: ${{ steps.affected.outputs.dashboard }}
+      client: ${{ steps.affected.outputs.client }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Get affected projects
+        id: affected
+        run: |
+          if [ "${{ github.event_name }}" == "pull_request" ]; then
+            BASE="origin/main"
+          else
+            BASE="${{ github.event.before }}"
+          fi
+          
+          API=$(npx nx show project nest-api --affected --base=$BASE --head=HEAD 2>/dev/null || echo "")
+          DASHBOARD=$(npx nx show project ang-dashboard-fe --affected --base=$BASE --head=HEAD 2>/dev/null || echo "")
+          CLIENT=$(npx nx show project trivia-client --affected --base=$BASE --head=HEAD 2>/dev/null || echo "")
+          
+          echo "api=$([ ! -z "$API" ] && echo "true" || echo "false")" >> $GITHUB_OUTPUT
+          echo "dashboard=$([ ! -z "$DASHBOARD" ] && echo "true" || echo "false")" >> $GITHUB_OUTPUT
+          echo "client=$([ ! -z "$CLIENT" ] && echo "true" || echo "false")" >> $GITHUB_OUTPUT
+
+  # Deploy API a AWS ECS
+  deploy-api:
+    needs: affected
+    if: needs.affected.outputs.api == 'true' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build API
+        run: npx nx build nest-api --prod
+
+      - name: Build Docker image
+        run: |
+          docker build -t ${{ secrets.ECR_REPOSITORY_NAME }}:latest -f packages/nest-api/Dockerfile .
+          docker tag ${{ secrets.ECR_REPOSITORY_NAME }}:latest ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.ECR_REPOSITORY_NAME }}:latest
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Push to ECR
+        run: |
+          docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.ECR_REPOSITORY_NAME }}:latest
+
+      - name: Update ECS service
+        run: |
+          aws ecs update-service --cluster ${{ secrets.ECS_CLUSTER_NAME }} --service ${{ secrets.ECS_SERVICE_NAME }} --force-new-deployment
+
+  # Deploy Dashboard a Vercel
+  deploy-dashboard:
+    needs: affected
+    if: needs.affected.outputs.dashboard == 'true' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build Dashboard
+        run: npx nx build ang-dashboard-fe --prod
+
+      - name: Deploy to Vercel
+        uses: amondnet/vercel-action@v25
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_DASHBOARD_PROJECT_ID }}
+          working-directory: ./dist/packages/ang-dashboard-fe/browser
+          vercel-args: '--prod'
+
+  # Deploy Client a Vercel
+  deploy-client:
+    needs: affected
+    if: needs.affected.outputs.client == 'true' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build Client
+        run: npx nx build trivia-client --prod
+
+      - name: Deploy to Vercel
+        uses: amondnet/vercel-action@v25
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_CLIENT_PROJECT_ID }}
+          working-directory: ./dist/packages/trivia-client
+          vercel-args: '--prod'
+
+  # Deploy todos los proyectos (para deploy manual o forzado)
+  deploy-all:
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build all projects
+        run: |
+          npx nx build nest-api --prod
+          npx nx build ang-dashboard-fe --prod
+          npx nx build trivia-client --prod
+
+      # Aquí irían los pasos de deploy para cada proyecto
+      # (Similar a los jobs anteriores)

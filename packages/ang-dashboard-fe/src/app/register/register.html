@@ -83,9 +83,10 @@
         <button 
           type="submit" 
           class="register-button"
-          [disabled]="!registerForm.valid"
+          [disabled]="!registerForm.valid || isLoading"
         >
-          Registrarse
+          <i *ngIf="isLoading" class="pi pi-spin pi-spinner mr-2"></i>
+          {{ isLoading ? 'Registrando...' : 'Registrarse' }}
         </button>
       </form>
 

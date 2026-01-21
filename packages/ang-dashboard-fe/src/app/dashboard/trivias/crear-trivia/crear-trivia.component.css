@@ -1,7 +1,25 @@
 .crear-trivia-container {
   padding: 1rem;
-  background-color: #f8f9fa;
+  background-color: #f3f4f6;
   min-height: 100vh;
+}
+
+/* Custom burgundy outline button */
+.custom-bordo-button {
+  background-color: transparent !important;
+  border-color: #800020 !important;
+  color: #800020 !important;
+  border-width: 2px !important;
+}
+
+.custom-bordo-button:hover {
+  background-color: #800020 !important;
+  color: white !important;
+  border-color: #800020 !important;
+}
+
+.custom-bordo-button:focus {
+  box-shadow: 0 0 0 2px rgba(128, 0, 32, 0.2) !important;
 }
 
 .main-card {
@@ -152,6 +170,23 @@
 
 .text-400 {
   color: #9ca3af;
+}
+
+/* Estilos para el p-dialog */
+::ng-deep .p-dialog .p-dialog-content {
+  background-color: #f3f4f6 !important; /* Fondo gris claro */
+  color: #333 !important; /* Texto oscuro */
+}
+
+::ng-deep .p-dialog .p-dialog-header {
+  background-color: #f3f4f6 !important; /* Fondo gris claro para el encabezado */
+  color: #333 !important; /* Texto oscuro para el encabezado */
+  border-bottom: 1px solid #ddd; /* Separador */
+}
+
+::ng-deep .p-dialog .p-dialog-footer {
+  background-color: #f3f4f6 !important; /* Fondo gris claro para el pie de página */
+  border-top: 1px solid #ddd; /* Separador */
 }
 
 /* Responsive design */

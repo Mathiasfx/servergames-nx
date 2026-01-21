@@ -6,5 +6,6 @@ import { PrismaService } from '../../prisma.service';
 @Module({
   controllers: [TriviasController],
   providers: [TriviasService, PrismaService],
+  exports: [TriviasService],
 })
 export class TriviasModule {}

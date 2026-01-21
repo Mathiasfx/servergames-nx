@@ -4,6 +4,24 @@
   min-height: 100vh;
 }
 
+/* Custom burgundy outline button */
+.custom-bordo-button {
+  background-color: transparent !important;
+  border-color: #800020 !important;
+  color: #800020 !important;
+  border-width: 2px !important;
+}
+
+.custom-bordo-button:hover {
+  background-color: #800020 !important;
+  color: white !important;
+  border-color: #800020 !important;
+}
+
+.custom-bordo-button:focus {
+  box-shadow: 0 0 0 2px rgba(128, 0, 32, 0.2) !important;
+}
+
 .page-header {
   margin-bottom: 2rem;
 }
