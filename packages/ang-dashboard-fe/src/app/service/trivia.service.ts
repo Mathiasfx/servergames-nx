@@ -27,7 +27,7 @@ export interface Trivia {
 })
 export class TriviaService {
   private apiUrl =
-    'http://ec2-3-236-119-111.compute-1.amazonaws.com:3007/api/rooms/trivias'; // Backend corriendo en puerto 3007
+    'https://trivianestapi.com.ar/api/rooms/trivias'; // Backend con HTTPS
 
   private readonly http = inject(HttpClient);
 

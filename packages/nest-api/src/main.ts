@@ -10,11 +10,13 @@ import { join } from 'path';
 import { NestExpressApplication } from '@nestjs/platform-express';
 
 async function bootstrap() {
+ 
+  
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
   // Configura CORS para permitir peticiones desde tu frontend
   app.enableCors({
-    origin: ['http://localhost:4200', 'http://localhost:3007'], // Permitir también el mismo puerto
+    origin: ['http://localhost:4200', 'http://localhost:3007','https://triviamultiplayerdashboard.netlify.app', 'https://triviamultiplayer.netlify.app'], // Permitir también el mismo puerto
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],

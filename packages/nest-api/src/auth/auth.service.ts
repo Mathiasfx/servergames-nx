@@ -18,6 +18,7 @@ export class AuthService {
         username: data.username,
         password: hashedPassword,
         userType: 'FREE',
+        createdAt: new Date(),
       },
     });
     return { id: user.id, email: user.email, username: user.username };

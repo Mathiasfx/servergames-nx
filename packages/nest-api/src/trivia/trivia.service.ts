@@ -40,6 +40,7 @@ export class TriviaService {
         title: createTriviaDto.title,
         questions: createTriviaDto.questions as any,
         isActive: false, // No activar automáticamente al crear
+        createdAt: new Date(),
       },
     });
   }

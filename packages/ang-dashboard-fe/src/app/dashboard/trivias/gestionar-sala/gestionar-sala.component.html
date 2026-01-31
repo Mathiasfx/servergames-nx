@@ -1,168 +1,148 @@
 <!-- eslint-disable @angular-eslint/template/elements-content -->
-<div class="gestionar-sala-container">
-  <p-toast></p-toast>
-  
-  <!-- Header -->
-  <div class="page-header">
-    <div class="header-content">
-      <div class="header-text">
-        <h2 class="page-title">Gestión de Sala</h2>
-        <p class="page-subtitle" *ngIf="trivia">{{ trivia?.title }}</p>
-      </div>
-      <div class="header-actions">
-        <button 
-          pButton 
-          label="Volver" 
-          icon="pi pi-arrow-left"
-          class="custom-bordo-button"
-          (click)="routerPublic.navigate(['/dashboard'])"
-        ></button>
-      </div>
-    </div>
-  </div>
+<div class="container p-4">
+  <!-- Spinner de carga inicial -->
+  <p-progressSpinner *ngIf="loading" class="mb-4"></p-progressSpinner>
 
-  <!-- Estado de la trivia -->
-  <p-card header="Información de la Trivia" class="info-card">
-    <div class="info-grid">
-      <div class="info-section">
-        <div class="info-item">
-          <span class="info-label">Estado:</span>
-          <p-tag 
-            [value]="roomState?.isActive ? 'Activa' : 'Inactiva'" 
-            [severity]="roomState?.isActive ? 'success' : 'warn'"
+  <!-- Contenido principal -->
+  <div *ngIf="!loading && trivia">
+    <!-- Tarjeta principal -->
+    <p-card class="mb-4">
+      <ng-template pTemplate="header">
+        <h2 class="text-2xl font-bold">{{ trivia.title }}</h2>
+      </ng-template>
+
+      <div class="grid grid-cols-2 gap-4 mb-6">
+        <!-- Estado de la Sala -->
+        <div>
+          <p class="text-sm text-gray-600">Estado de la Sala</p>
+          <p-tag
+            *ngIf="roomState?.isActive"
+            value="🟢 Activa"
+            severity="success"
+          ></p-tag>
+          <p-tag
+            *ngIf="!roomState?.isActive"
+            value="🔴 Inactiva"
+            severity="danger"
           ></p-tag>
         </div>
-        <div class="info-item">
-          <span class="info-label">Preguntas:</span>
-          <span class="info-value">{{ trivia?.questions?.length || 0 }}</span>
+
+        <!-- Estado del Juego -->
+        <div>
+          <p class="text-sm text-gray-600">Estado del Juego</p>
+          <p-tag
+            *ngIf="roomState?.gameStarted"
+            value="🎮 En Progreso"
+            severity="info"
+          ></p-tag>
+          <p-tag
+            *ngIf="!roomState?.gameStarted"
+            value="⏸️ Detenido"
+            severity="warn"
+          ></p-tag>
         </div>
-        <div class="info-item">
-          <span class="info-label">Room ID:</span>
-          <span class="room-id" *ngIf="roomState?.isActive">{{ roomId }}</span>
-          <span class="room-id inactive" *ngIf="!roomState?.isActive">--- (Sala inactiva)</span>
+
+        <!-- Room ID -->
+        <div>
+          <p class="text-sm text-gray-600">ID de la Sala</p>
+          <p class="text-lg font-bold">{{ roomId }}</p>
+        </div>
+
+        <!-- Contador de Jugadores -->
+        <div>
+          <p class="text-sm text-gray-600">Jugadores Conectados</p>
+          <p class="text-lg font-bold">{{ playersCount }}/10</p>
+        </div>
+
+        <!-- Total de Preguntas -->
+        <div>
+          <p class="text-sm text-gray-600">Total de Preguntas</p>
+          <p class="text-lg font-bold">{{ trivia.questions?.length || 0 }}</p>
+        </div>
+
+        <!-- Ronda Actual -->
+        <div>
+          <p class="text-sm text-gray-600">Ronda Actual</p>
+          <p class="text-lg font-bold">{{ roomState?.round || 0 }}</p>
         </div>
       </div>
-      <div class="actions-section">
-        <button 
-          pButton 
-          [label]="roomState?.isActive ? 'Desactivar Sala' : 'Activar Sala'" 
-          [icon]="roomState?.isActive ? 'pi pi-times' : 'pi pi-check'"
-          class="p-button-outlined action-btn"
+
+      <!-- Botones de Control -->
+      <div class="flex gap-2 mb-6 flex-wrap">
+        <!-- Botón Activar/Desactivar -->
+        <button
           (click)="toggleRoomActivation()"
-          [disabled]="!roomId || isActivating"
-        >
-          <i *ngIf="isActivating" class="pi pi-spin pi-spinner mr-2"></i>
-          {{ isActivating ? (roomState?.isActive ? 'Desactivando...' : 'Activando...') : (roomState?.isActive ? 'Desactivar Sala' : 'Activar Sala') }}
-        </button>
-        <button 
-          pButton 
-          label="Código Sala" 
-          icon="pi pi-qrcode"
-          class="p-button-outlined custom-bordo-button"
-          (click)="showQRCode()"
-          [disabled]="!roomState?.isActive || !roomId"
+          [disabled]="isActivating || !roomState"
+          pButton
+          type="button"
+          [label]="roomState?.isActive ? '🔴 Desactivar Sala' : '🟢 Activar Sala'"
+          [class]="roomState?.isActive ? 'p-button-danger' : 'p-button-success'"
+          [loading]="isActivating"
         ></button>
-        <button 
-          pButton 
-          label="Iniciar Partida" 
-          icon="pi pi-play"
-          class="p-button-outlined custom-bordo-button"
+
+        <!-- Botón Iniciar Juego -->
+        <button
           (click)="startGame()"
-          [disabled]="!roomState?.isActive || playersCount === 0 || roomState?.isActive"
+          [disabled]="!canStartGame || isLoading"
+          pButton
+          type="button"
+          label="🚀 Iniciar Juego"
+          class="p-button-success"
+          [loading]="isLoading"
         ></button>
-       
-      </div>
-    </div>
-  </p-card>
 
-  <!-- Jugadores conectados -->
-  <p-card header="Jugadores Conectados" class="players-card">
-    <div class="players-section">
-      <div class="players-header">
-        <span class="section-label">Total:</span>
-        <p-tag [value]="playersCount.toString()" severity="info"></p-tag>
+        <!-- Botón Mostrar QR -->
+        <button
+          (click)="showQRCode()"
+          pButton
+          type="button"
+          label="📱 Mostrar QR"
+          class="p-button-info"
+        ></button>
       </div>
-      
-      <div class="players-list">
-        <div *ngFor="let player of getPlayers(); let i = index; trackBy: trackByPlayerId" class="player-item">
-          <div class="player-info">
-            <span class="player-name">{{ i + 1 }}. {{ player.name }}</span>
-            <p-tag 
-              *ngIf="player.answeredAt" 
-              value="Respondió" 
-              [severity]="player.answeredCorrect ? 'warn' : 'danger'"
-              size="small"
-            ></p-tag>
-          </div>
-          <div class="player-score">
-            <span class="score-value">{{ player.score }}</span>
-            <span class="score-label">pts</span>
-          </div>
-        </div>
-      </div>
-      
-      <div *ngIf="playersCount === 0" class="empty-state">
-        <i class="pi pi-users empty-icon"></i>
-        <p class="empty-title">No hay jugadores conectados aún</p>
-        <p class="empty-subtitle">Genera el código para que los jugadores se unan</p>
-      </div>
-    </div>
-  </p-card>
+    </p-card>
 
-  <!-- Estado del juego -->
-  <p-card header="Estado del Juego" *ngIf="roomState?.isActive" class="game-state-card">
-    <div class="game-state-grid">
-      <div class="game-info">
-        <div class="game-item">
-          <span class="game-label">Ronda actual:</span>
-          <p-tag [value]="currentRound.toString()" severity="info"></p-tag>
-          <span class="game-detail">de {{ totalQuestions }}</span>
-        </div>
-        <div class="game-item">
-          <span class="game-label">Respondieron:</span>
-          <span class="game-detail">{{ answeredCount }}/{{ playersCount }}</span>
-        </div>
-      </div>
-      <div class="current-question" *ngIf="roomState?.currentQuestion">
-        <h5 class="question-title">Pregunta Actual</h5>
-        <p class="question-text">{{ roomState?.currentQuestion?.question }}</p>
-        <div class="question-options">
-          <div *ngFor="let option of roomState?.currentQuestion?.options" class="option-item">
-            {{ option }}
-          </div>
-        </div>
-      </div>
-    </div>
-  </p-card>
+    <!-- Tarjeta de Jugadores -->
+    <p-card class="mb-4">
+      <ng-template pTemplate="header">
+        <h3 class="text-xl font-bold">Jugadores en la Sala</h3>
+      </ng-template>
 
-  <!-- Diálogo QR -->
-  <p-dialog 
-    header="Código QR de la Sala" 
-    [(visible)]="showQRDialog" 
-    [modal]="true" 
-    [style]="{width: '400px'}"
-    styleClass="light-qr-modal"
-    [draggable]="false"
-    [resizable]="false"
-  >
-    <div class="qr-dialog">
-      <div class="qr-code">
-        <div class="room-code">{{ roomId }}</div>
+      <div *ngIf="playersCount === 0" class="text-center text-gray-500 py-8">
+        <p>📭 Esperando jugadores...</p>
       </div>
-      <p class="qr-description">
-        Los jugadores pueden usar este código del el Room ID para unirse a la partida.
-      </p>
-      
-    </div>
-    
-    <ng-template pTemplate="footer">
-      <button 
-        pButton 
-        label="Cerrar" 
-        icon="pi pi-times"
-        class="p-button-outlined custom-bordo-button"
-        (click)="showQRDialog = false"
-      ></button>
-    </ng-template>
-  </p-dialog>
+
+      <div *ngIf="playersCount > 0" class="space-y-2">
+        <div
+          *ngFor="let player of players"
+          class="flex justify-between items-center bg-gray-100 p-3 rounded"
+        >
+          <div>
+            <p class="font-medium">{{ player.name }}</p>
+            <p class="text-sm text-gray-600">Score: {{ player.score }}</p>
+          </div>
+          <p-tag value="👤 Jugador" severity="info"></p-tag>
+        </div>
+      </div>
+    </p-card>
+
+    <!-- Dialog para QR -->
+    <p-dialog
+      [(visible)]="showQRDialog"
+      header="Código QR"
+      [modal]="true"
+      [style]="{ width: '50vw' }"
+    >
+      <div class="text-center">
+        <img [src]="qrCodeUrl" alt="QR Code" class="inline" />
+        <p class="mt-4 text-gray-600">
+          Los jugadores pueden escanear este código para unirse a la sala
+        </p>
+        <p class="font-bold">{{ roomId }}</p>
+      </div>
+    </p-dialog>
+  </div>
 </div>
+
+<!-- Toast para notificaciones -->
+<p-toast></p-toast>

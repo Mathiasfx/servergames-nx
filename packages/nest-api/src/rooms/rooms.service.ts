@@ -25,6 +25,7 @@ interface Room {
   };
   round: number;
   isActive: boolean;
+  gameStarted: boolean;
   questions: TriviaQuestion[];
   triviaId?: string;
 }
@@ -40,6 +41,7 @@ export class RoomsService {
         players: [],
         round: 0,
         isActive: false,
+        gameStarted: false,
         currentQuestion: undefined,
         questions: [],
         triviaId: triviaId
@@ -55,7 +57,7 @@ export class RoomsService {
     }
     
     // Check if game is already started
-    if (this.rooms[roomId].isActive) {
+    if (this.rooms[roomId].gameStarted) {
       return null; // Game already started
     }
     
@@ -75,8 +77,8 @@ export class RoomsService {
 
   startGame(roomId: string, questions: TriviaQuestion[]): boolean {
     const room = this.rooms[roomId];
-    if (room && !room.isActive) {
-      room.isActive = true;
+    if (room && !room.gameStarted) {
+      room.gameStarted = true;
       room.round = 1;
       room.questions = questions;
       this.setCurrentQuestion(roomId);
@@ -99,7 +101,7 @@ export class RoomsService {
 
   submitAnswer(roomId: string, playerId: string, answer: string): { correct: boolean; score: number } | null {
     const room = this.rooms[roomId];
-    if (!room || !room.isActive) return null;
+    if (!room || !room.gameStarted) return null;
     const player = room.players.find(p => p.id === playerId);
     if (!player || player.answeredAt || player.isAdmin) return null; // Admin no responde
     player.answeredAt = Date.now();
@@ -116,13 +118,13 @@ export class RoomsService {
 
   nextRound(roomId: string): boolean {
     const room = this.rooms[roomId];
-    if (!room || !room.isActive) return false;
+    if (!room || !room.gameStarted) return false;
     if (room.round < room.questions.length) {
       room.round++;
       this.setCurrentQuestion(roomId);
       return true;
     } else {
-      room.isActive = false;
+      room.gameStarted = false;
       return false;
     }
   }
@@ -139,7 +141,7 @@ export class RoomsService {
     const room = this.rooms[roomId];
     if (!room) return false;
     
-    room.isActive = false;
+    room.gameStarted = false;
     room.currentQuestion = undefined;
     
     // Reset player answers

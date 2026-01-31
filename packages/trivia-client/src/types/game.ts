@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 export interface Player {
   id: string;
   name: string;
@@ -18,6 +19,7 @@ export interface Room {
   triviaId: string;
   players: Player[];
   isActive: boolean;
+  gameStarted: boolean;
   round: number;
   questions: Question[];
   currentQuestion?: Question;
